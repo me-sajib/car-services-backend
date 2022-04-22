@@ -2,7 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 // import to mongodb client
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 // 6JXOx7bPqtp1ucTj sajibDb
@@ -25,8 +25,17 @@ async function run() {
     await client.connect();
     const serviceCollection = client.db("services").collection("allService");
 
+    // show all services
     app.get("/service", async (req, res) => {
       const cursor = serviceCollection.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // show single service
+    app.get("/service/:id", async (req, res) => {
+      const id = req.params.id;
+      const cursor = serviceCollection.find({ _id: ObjectId(id) });
       const result = await cursor.toArray();
       res.send(result);
     });
