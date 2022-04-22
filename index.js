@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 // 6JXOx7bPqtp1ucTj sajibDb
 // mongodb uri and connect
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.USER_PASS}@cluster0.gttgi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://sajibDb:6JXOx7bPqtp1ucTj@cluster0.gttgi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -20,17 +20,20 @@ app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-client.connect((err) => {
-  const collection = client.db("test").collection("devices");
-  async function run() {
-    try {
-      console.log("Connected to MongoDB");
-    } finally {
-      client.close();
-    }
+async function run() {
+  try {
+    await client.connect();
+    const serviceCollection = client.db("services").collection("allService");
+
+    app.get("/service", async (req, res) => {
+      const cursor = serviceCollection.find({});
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+  } finally {
   }
-  run();
-});
+}
+run();
 
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
