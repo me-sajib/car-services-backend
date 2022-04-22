@@ -39,6 +39,13 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // add new service
+    app.post("/service", async (req, res) => {
+      const query = req.body;
+      const result = await serviceCollection.insertOne(query);
+      res.send(result);
+    });
   } finally {
   }
 }
