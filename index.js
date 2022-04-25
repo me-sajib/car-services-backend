@@ -32,6 +32,15 @@ async function run() {
       const order = await orderCollection.insertOne(query);
       res.send(order);
     });
+
+    // get all order
+    app.get("/order", async (req, res) => {
+      const email = req.query.email;
+      const cursor = orderCollection.find({ email });
+      const order = await cursor.toArray();
+      res.send(order);
+    });
+
     // show all services
     app.get("/service", async (req, res) => {
       const cursor = serviceCollection.find({});
