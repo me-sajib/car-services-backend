@@ -1,11 +1,29 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 // import to mongodb client
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
-// 6JXOx7bPqtp1ucTj sajibDb
+
+function varifyToken(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth) {
+    return res.status(401).send({ message: "unauthorize" });
+  }
+  const token = auth.split(" ")[1];
+  const tok =
+    "49ab537d9701badd8b9fc609d8773acc4107515b0f68c1f5266c9a78c32b1a0fa04aefed3ce0c39fad85eaa803a663d41f1b204792ac0eb54101ba4ff4302ebe";
+  jwt.verify(token, tok, (err, decode) => {
+    if (err) {
+      return res.status(403).send({ error: "forbidden" });
+    }
+    req.decode = decode;
+    next();
+  });
+}
+
 // mongodb uri and connect
 const uri = `mongodb+srv://sajibDb:6JXOx7bPqtp1ucTj@cluster0.gttgi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -26,18 +44,32 @@ async function run() {
     const serviceCollection = client.db("services").collection("allService");
     const orderCollection = client.db("services").collection("orders");
 
+    // access token
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const tok =
+        "49ab537d9701badd8b9fc609d8773acc4107515b0f68c1f5266c9a78c32b1a0fa04aefed3ce0c39fad85eaa803a663d41f1b204792ac0eb54101ba4ff4302ebe";
+      const token = jwt.sign(user, tok, { expiresIn: "1d" });
+      res.send({ token });
+    });
+
+    // get all order
+    app.get("/order", varifyToken, async (req, res) => {
+      const tokenEmail = req.decode.email;
+      const email = req.query.email;
+      if (email === tokenEmail) {
+        const cursor = orderCollection.find({ email });
+        const order = await cursor.toArray();
+        res.send(order);
+      } else {
+        res.status(403).send({ error: "forbidden" });
+      }
+    });
+
     // send to order collection
     app.post("/order", async (req, res) => {
       const query = req.body;
       const order = await orderCollection.insertOne(query);
-      res.send(order);
-    });
-
-    // get all order
-    app.get("/order", async (req, res) => {
-      const email = req.query.email;
-      const cursor = orderCollection.find({ email });
-      const order = await cursor.toArray();
       res.send(order);
     });
 
