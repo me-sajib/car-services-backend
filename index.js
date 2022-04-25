@@ -24,7 +24,14 @@ async function run() {
   try {
     await client.connect();
     const serviceCollection = client.db("services").collection("allService");
+    const orderCollection = client.db("services").collection("orders");
 
+    // send to order collection
+    app.post("/order", async (req, res) => {
+      const query = req.body;
+      const order = await orderCollection.insertOne(query);
+      res.send(order);
+    });
     // show all services
     app.get("/service", async (req, res) => {
       const cursor = serviceCollection.find({});
