@@ -25,7 +25,7 @@ function varifyToken(req, res, next) {
 }
 
 // mongodb uri and connect
-const uri = `mongodb+srv://sajibDb:6JXOx7bPqtp1ucTj@cluster0.gttgi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.gttgi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -41,8 +41,10 @@ app.get("/", (req, res) => {
 async function run() {
   try {
     await client.connect();
-    const serviceCollection = client.db("services").collection("allService");
-    const orderCollection = client.db("services").collection("orders");
+    const serviceCollection = client
+      .db(process.env.DB_NAME)
+      .collection(process.env.COLLECTION_NAME);
+    const orderCollection = client.db(process.env.DB_NAME).collection("orders");
 
     // access token
     app.post("/login", async (req, res) => {
