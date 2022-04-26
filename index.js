@@ -35,7 +35,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("hello world");
+  res.send("hello experss is here");
 });
 
 async function run() {
